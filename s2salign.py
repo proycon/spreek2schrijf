@@ -66,20 +66,21 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
 
 
 
-def align(transcriptdoc, audiodoc):
-    tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
+def align(transcriptdoc, audiodoc, tokenizer, score_threshold):
     audiowords = list(audiodoc)
     print("Words in ASR output: ",len(audiowords),file=sys.stderr)
-    for paragraph in transcriptdoc:
+    paragraphs = list(transcriptdoc)
+    for i, paragraph in enumerate(paragraphs):
         #pass paragraph to tokeniser
-        print("PROCESSING: ", paragraph,file=sys.stderr)
+        print("PROCESSING #" + str(i) + "/" + str(len(paragraphs)) + ":",  paragraph,file=sys.stderr)
         tokenizer.process(paragraph)
         transcriptsentence = []
         for token in tokenizer:
-            transcriptsentence.append(token)
+            transcriptsentence.append( (str(token), token.type()) )
             if token.isendofsentence():
-                match, score = find_sequence(audiowords, [ str(word) for word in transcriptsentence if word.type != 'PUNCTUATION' ] )
-                yield " ".join((str(word) for word in transcriptsentence)), " ".join(match), score
+                match, score = find_sequence(audiowords, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
+                if score >= score_threshold:
+                    yield " ".join([ word for word, wordtype in transcriptsentence]), " ".join(match), score
                 transcriptsentence = []
 
 def main():
@@ -91,11 +92,11 @@ def main():
 
     audiodoc = AudioDoc(args.speech)
     transcriptdoc = SimplifiedVLOSDoc(args.transcript)
+    tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
 
-    print("{ 'sentence_pairs' : [\n")
-    for transcriptsentence, asrsentence, score in align(transcriptdoc, audiodoc):
-        if score >= args.score:
-            print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False))
+    print("{ 'sentence_pairs' : [")
+    for transcriptsentence, asrsentence, score in align(transcriptdoc, audiodoc, tokenizer, args.score):
+        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False))
     print("]}")
 
 
