@@ -66,22 +66,32 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
 
 
 
-def align(transcriptdoc, audiodoc, tokenizer, score_threshold):
-    audiowords = list(audiodoc)
-    print("Words in ASR output: ",len(audiowords),file=sys.stderr)
-    paragraphs = list(transcriptdoc)
-    for i, paragraph in enumerate(paragraphs):
-        #pass paragraph to tokeniser
-        print("PROCESSING #" + str(i) + "/" + str(len(paragraphs)) + ":",  paragraph,file=sys.stderr)
-        tokenizer.process(paragraph)
-        transcriptsentence = []
-        for token in tokenizer:
-            transcriptsentence.append( (str(token), token.type()) )
-            if token.isendofsentence():
-                match, score = find_sequence(audiowords, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
-                if score >= score_threshold:
-                    yield " ".join([ word for word, wordtype in transcriptsentence]), " ".join(match), score
-                transcriptsentence = []
+class Aligner:
+
+    def __init__(self):
+        self.loss = 0
+        self.total = 0
+        self.tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
+
+    def __call__(self,transcriptdoc, audiodoc, score_threshold):
+        audiowords = list(audiodoc)
+        print("Words in ASR output: ",len(audiowords),file=sys.stderr)
+        paragraphs = list(transcriptdoc)
+        for i, paragraph in enumerate(paragraphs):
+            #pass paragraph to tokeniser
+            print("PROCESSING #" + str(i) + "/" + str(len(paragraphs)) + ":",  paragraph,file=sys.stderr)
+            self.tokenizer.process(paragraph)
+            transcriptsentence = []
+            for token in self.tokenizer:
+                transcriptsentence.append( (str(token), token.type()) )
+                if token.isendofsentence():
+                    match, score = find_sequence(audiowords, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
+                    if score >= score_threshold:
+                        yield " ".join([ word for word, wordtype in transcriptsentence]), " ".join(match), score
+                    else:
+                        self.loss += 1
+                    self.total += 1
+                    transcriptsentence = []
 
 def main():
     parser = argparse.ArgumentParser(description="Spreek2Schrijf Aligner", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -92,11 +102,13 @@ def main():
 
     audiodoc = AudioDoc(args.speech)
     transcriptdoc = SimplifiedVLOSDoc(args.transcript)
-    tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
 
     print("{ 'sentence_pairs' : [")
-    for transcriptsentence, asrsentence, score in align(transcriptdoc, audiodoc, tokenizer, args.score):
+    aligner = Aligner()
+    for transcriptsentence, asrsentence, score in aligner(transcriptdoc, audiodoc, args.score):
         print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False))
+        if aligner.total:
+            print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
     print("]}")
 
 
