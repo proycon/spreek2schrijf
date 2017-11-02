@@ -65,7 +65,7 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
 
         if matchseq:
             matchwords = [seq1[i] for i in reversed(matchseq) ]
-            return matchwords, score, matchseq[-1]
+            return matchwords, score, matchseq[0]+1
 
     return [],score,0
 
@@ -84,7 +84,7 @@ class Aligner:
         audiowords = list(audiodoc)
         print("Words in ASR output: ",len(audiowords),file=sys.stderr)
         paragraphs = list(transcriptdoc)
-        buffer = audiowords[:MARGIN]
+        window = audiowords[:MARGIN]
         cursor = 0
         for i, paragraph in enumerate(paragraphs):
             #pass paragraph to tokeniser
@@ -94,23 +94,25 @@ class Aligner:
             for token in self.tokenizer:
                 transcriptsentence.append( (str(token), token.type()) )
                 if token.isendofsentence():
-                    match, score, offset = find_sequence(buffer, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
+                    match, score, offset = find_sequence(window, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
                     self.total += 1
                     if score >= score_threshold:
                         if self.debug:
-                            print("--------------------------------------------------",file=sys.stderr)
+                            print("------------------------------------------------------------------------------",file=sys.stderr)
                             print("TRANSCRIPT: ", " ".join([ word for word, wordtype in transcriptsentence]) ,file=sys.stderr)
                             print("       ASR: ", " ".join(match) ,file=sys.stderr)
                             print("     SCORE: ", score,file=sys.stderr)
+                            print("  PROGRESS: ", round((cursor / len(audiowords))*100,1), '%',file=sys.stderr)
+                            print("      LOSS: ", round((self.loss / self.total) * 100,1), "%", file=sys.stderr)
+                            print("    CURSOR: ", cursor,file=sys.stderr)
+                            print("   +OFFSET: ", cursor+offset,file=sys.stderr)
+                            print("    WINDOW: ", window[:10],file=sys.stderr)
                         if len(transcriptsentence) >= 10 and score >= 0.85:
                             #we have a strong alignment, reset the cursor for next batch
-                            if self.debug:
-                                print("Offset =", offset,file=sys.stderr)
                             cursor += offset
-                            buffer = audiowords[cursor:cursor+MARGIN]
+                            window = audiowords[cursor:cursor+MARGIN]
                             if self.debug:
-                                print("--> Moved cursor to ", cursor,file=sys.stderr)
-                                print(["   "] + audiowords[cursor-15:cursor] + [" >>>>CURSOR<<<< "] + buffer[:15],file=sys.stderr)
+                                print("    (WINDOW MOVED)",file=sys.stderr)
                         yield " ".join([ word for word, wordtype in transcriptsentence]), " ".join(match), score
                     else:
                         self.loss += 1
@@ -131,7 +133,7 @@ def main():
     aligner = Aligner(args.debug)
     for transcriptsentence, asrsentence, score in aligner(transcriptdoc, audiodoc, args.score):
         print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False)+",")
-        if aligner.total:
+        if aligner.total and not args.debug:
             print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
     print("]}")
 
