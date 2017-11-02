@@ -74,10 +74,11 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
 
 class Aligner:
 
-    def __init__(self):
+    def __init__(self,debug=False):
         self.loss = 0
         self.total = 0
         self.tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
+        self.debug = debug
 
     def __call__(self,transcriptdoc, audiodoc, score_threshold):
         audiowords = list(audiodoc)
@@ -94,15 +95,22 @@ class Aligner:
                 transcriptsentence.append( (str(token), token.type()) )
                 if token.isendofsentence():
                     match, score, offset = find_sequence(buffer, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
-                    if len(transcriptsentence) >= 10 and score >= 0.85:
-                        #we have a strong alignment, reset the cursor for next batch
-                        print("Offset =", offset,file=sys.stderr)
-                        cursor += offset
-                        buffer = audiowords[cursor:cursor+MARGIN]
-                        print("--> Moved cursor to ", cursor,file=sys.stderr)
-                        print(["   "] + audiowords[cursor-15:cursor] + [" >>>>CURSOR<<<< "] + buffer[:15],file=sys.stderr)
                     self.total += 1
                     if score >= score_threshold:
+                        if self.debug:
+                            print("--------------------------------------------------",file=sys.stderr)
+                            print("TRANSCRIPT: ", " ".join([ word for word, wordtype in transcriptsentence]) ,file=sys.stderr)
+                            print("       ASR: ", " ".join(match) ,file=sys.stderr)
+                            print("     SCORE: ", score,file=sys.stderr)
+                        if len(transcriptsentence) >= 10 and score >= 0.85:
+                            #we have a strong alignment, reset the cursor for next batch
+                            if self.debug:
+                                print("Offset =", offset,file=sys.stderr)
+                            cursor += offset
+                            buffer = audiowords[cursor:cursor+MARGIN]
+                            if self.debug:
+                                print("--> Moved cursor to ", cursor,file=sys.stderr)
+                                print(["   "] + audiowords[cursor-15:cursor] + [" >>>>CURSOR<<<< "] + buffer[:15],file=sys.stderr)
                         yield " ".join([ word for word, wordtype in transcriptsentence]), " ".join(match), score
                     else:
                         self.loss += 1
@@ -113,13 +121,14 @@ def main():
     parser.add_argument('-s','--speech', type=str,help="AudioDoc XML", action='store',default="",required=True)
     parser.add_argument('-t','--transcript', type=str,help="Simplified VLOS XML", action='store',default="",required=True)
     parser.add_argument('-S','--score', type=float,help="Smith-Waterman distance score threshold", action='store',default=0.8,required=False)
+    parser.add_argument('-d','--debug', help="Debug", action='store_true',default=False,required=False)
     args = parser.parse_args()
 
     audiodoc = AudioDoc(args.speech)
     transcriptdoc = SimplifiedVLOSDoc(args.transcript)
 
     print("{ 'sentence_pairs' : [")
-    aligner = Aligner()
+    aligner = Aligner(args.debug)
     for transcriptsentence, asrsentence, score in aligner(transcriptdoc, audiodoc, args.score):
         print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False)+",")
         if aligner.total:
