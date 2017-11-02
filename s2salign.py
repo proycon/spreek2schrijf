@@ -4,7 +4,9 @@ import sys
 import string
 import argparse
 import numpy as np
+import json
 import lxml.etree
+import ucto
 
 class AudioDoc:
     def __init__(self, filename):
@@ -25,7 +27,8 @@ class SimplifiedVLOSDoc:
 
 
 #adapted from http://climberg.de/page/smith-waterman-distance-for-feature-extraction-in-nlp/ (by Christian Limbergs)
-def smith_waterman(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=1):
+def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=1):
+    """Smith Waterman algorithm"""
     # switch sequences, so that seq1 is the longer sequence to search for seq2
     if len(seq2) > len(seq1): seq1, seq2 = seq2, seq1
     # create the distance matrix
@@ -62,29 +65,39 @@ def smith_waterman(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0
 
 
 
-def align(transcriptdoc, audiodoc):
-    audiowords = list(audiodoc)
-    print("Words in audio: ",len(audiowords),file=sys.stderr)
-    for paragraph in transcriptdoc:
-        #crude tokenisation
-        transcriptwords = [ w.strip(string.punctuation) for w in paragraph.split(' ') ]
-        #find most likely sequence for this input
-        match, score = smith_waterman(audiowords, transcriptwords)
-        print("ORIGINAL: ", " ".join(transcriptwords),file=sys.stderr)
-        print("MATCH: ", " ".join(match),file=sys.stderr)
-        print("SCORE: ", score,file=sys.stderr)
 
+def align(transcriptdoc, audiodoc):
+    tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
+    audiowords = list(audiodoc)
+    print("Words in ASR output: ",len(audiowords),file=sys.stderr)
+    for paragraph in transcriptdoc:
+        #pass paragraph to tokeniser
+        print("PROCESSING: ", paragraph,file=sys.stderr)
+        tokenizer.process(paragraph)
+        transcriptsentence = []
+        for token in tokenizer:
+            transcriptsentence.append(token)
+            if token.isendofsentence():
+                match, score = find_sequence(audiowords, [ str(word) for word in transcriptsentence if word.type != 'PUNCTUATION' ] )
+                yield " ".join((str(word) for word in transcriptsentence)), " ".join(match), score
+                transcriptsentence = []
 
 def main():
     parser = argparse.ArgumentParser(description="Spreek2Schrijf Aligner", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-s','--speech', type=str,help="AudioDoc XML", action='store',default="",required=True)
     parser.add_argument('-t','--transcript', type=str,help="Simplified VLOS XML", action='store',default="",required=True)
+    parser.add_argument('-S','--score', type=float,help="Smith-Waterman distance score threshold", action='store',default=0.8,required=False)
     args = parser.parse_args()
 
     audiodoc = AudioDoc(args.speech)
     transcriptdoc = SimplifiedVLOSDoc(args.transcript)
 
-    align(transcriptdoc, audiodoc)
+    print("{ 'sentence_pairs' : [\n")
+    for transcriptsentence, asrsentence, score in align(transcriptdoc, audiodoc):
+        if score >= args.score:
+            print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False))
+    print("]}")
+
 
 
 
