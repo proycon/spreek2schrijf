@@ -6,6 +6,7 @@ import argparse
 import numpy as np
 import json
 import lxml.etree
+import Levenshtein
 import ucto
 
 MARGIN = 1000
@@ -27,9 +28,21 @@ class SimplifiedVLOSDoc:
             for alinea in tekst.xpath('.//alinea/p'):
                 yield alinea.text
 
+def wordmatch(s1,s2, threshold=2):
+    s1 = s1.lower()
+    s2 = s2.lower()
+    l1 = len(s1)
+    l2 = len(s2)
+    if s1 == s2:
+        return True
+    elif min(l1,l2) <= threshold+2 or l1 > l2 + threshold or l2 > l1 + threshold:
+        return False
+    else:
+        return Levenshtein.distance(s1,s2) <= threshold
+
 
 #adapted from http://climberg.de/page/smith-waterman-distance-for-feature-extraction-in-nlp/ (by Christian Limbergs)
-def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=True):
+def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=True, ldthreshold=2):
     """Smith Waterman algorithm"""
     # switch sequences, so that seq1 is the longer sequence to search for seq2
     if len(seq2) > len(seq1): seq1, seq2 = seq2, seq1
@@ -44,7 +57,7 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
                 # negative values are not allowed
                 0,
                 # if previous word matches increase the score by match, else decrease it by mismatch
-                mat[i - 1, j - 1] + (match if seq1[j - 1].lower() == seq2[i - 1].lower() else mismatch), #MAYBE TODO: match function can be made less strict
+                mat[i - 1, j - 1] + (match if wordmatch(seq1[j - 1],seq2[i - 1], ldthreshold) else mismatch), #MAYBE TODO: match function can be made less strict
                 # one word is missing in seq2, so decrease the score by deletion
                 mat[i - 1, j] + deletion,
                 # one additional word is in seq2, so decrease the score by insertion
@@ -80,7 +93,7 @@ class Aligner:
         self.tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
         self.debug = debug
 
-    def __call__(self,transcriptdoc, audiodoc, score_threshold):
+    def __call__(self,transcriptdoc, audiodoc, score_threshold, ldthreshold):
         audiowords = list(audiodoc)
         print("Words in ASR output: ",len(audiowords),file=sys.stderr)
         paragraphs = list(transcriptdoc)
@@ -94,7 +107,7 @@ class Aligner:
             for token in self.tokenizer:
                 transcriptsentence.append( (str(token), token.type()) )
                 if token.isendofsentence():
-                    match, score, offset = find_sequence(window, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] )
+                    match, score, offset = find_sequence(window, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] , ldthreshold=ldthreshold)
                     self.total += 1
                     if score >= score_threshold:
                         if self.debug:
@@ -106,7 +119,7 @@ class Aligner:
                             print("      LOSS: ", round((self.loss / self.total) * 100,1), "%", file=sys.stderr)
                             print("    CURSOR: ", cursor,file=sys.stderr)
                             print("   +OFFSET: ", cursor+offset,file=sys.stderr)
-                            print("    WINDOW: ", window[:10],file=sys.stderr)
+                            print("    WINDOW: ", " ".join(window[:10]) + " ...",file=sys.stderr)
                         if len(transcriptsentence) >= 10 and score >= 0.85:
                             #we have a strong alignment, reset the cursor for next batch
                             cursor += offset
@@ -123,6 +136,7 @@ def main():
     parser.add_argument('-s','--speech', type=str,help="AudioDoc XML", action='store',default="",required=True)
     parser.add_argument('-t','--transcript', type=str,help="Simplified VLOS XML", action='store',default="",required=True)
     parser.add_argument('-S','--score', type=float,help="Smith-Waterman distance score threshold", action='store',default=0.8,required=False)
+    parser.add_argument('-D','--ldthreshold', type=int,help="Levensthein distance score threshold for a word match", action='store',default=2,required=False)
     parser.add_argument('-d','--debug', help="Debug", action='store_true',default=False,required=False)
     args = parser.parse_args()
 
@@ -131,7 +145,7 @@ def main():
 
     print("{ 'sentence_pairs' : [")
     aligner = Aligner(args.debug)
-    for transcriptsentence, asrsentence, score in aligner(transcriptdoc, audiodoc, args.score):
+    for transcriptsentence, asrsentence, score in aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold):
         print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False)+",")
         if aligner.total and not args.debug:
             print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
