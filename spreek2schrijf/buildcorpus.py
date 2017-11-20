@@ -2,6 +2,7 @@
 
 import json
 import argparse
+import codecs
 import glob
 
 def main():
@@ -14,8 +15,8 @@ def main():
     schrijf = open(args.outputprefix +  ".schrijf.txt",'w',encoding='utf-8')
 
     for filename in glob.glob(args.inputdir + "/*.json"):
-        with open(filename,'rb') as f:
-            data = json.load(f)
+        with open(filename,'r',encoding='utf-8') as f:
+            data = json.load(codecs.getreader(f,'utf-8'))
             for sentencepair in data['sentence_pairs']:
                 if 'asr' in sentencepair and 'transcript' in sentencepair:
                     print(sentencepair['asr'],file=spraak)
