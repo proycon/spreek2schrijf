@@ -16,7 +16,7 @@ def main():
 
     for filename in glob.glob(args.inputdir + "/*.json"):
         with open(filename,'r',encoding='utf-8') as f:
-            data = json.load(codecs.getreader(f,'utf-8'))
+            data = json.load(f)
             for sentencepair in data['sentence_pairs']:
                 if 'asr' in sentencepair and 'transcript' in sentencepair:
                     print(sentencepair['asr'],file=spraak)
