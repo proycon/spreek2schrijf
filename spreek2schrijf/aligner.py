@@ -28,6 +28,19 @@ class SimplifiedVLOSDoc:
             for alinea in tekst.xpath('.//alinea/p'):
                 yield alinea.text
 
+class CXMLDoc:
+    def __init__(self, filename):
+        self.doc = lxml.etree.parse(filename).getroot()
+
+    def __iter__(self):
+        for utterance in self.doc.xpath('//utterance'):
+            text = utterance.text
+            #strip [Speaker:] metadata
+            i = text.find(']')
+            if i != -1 and i < 100:
+                text = text[i+1:]
+            yield text
+
 def wordmatch(s1,s2, threshold=2):
     s1 = s1.lower()
     s2 = s2.lower()
@@ -160,14 +173,14 @@ class Aligner:
 def main():
     parser = argparse.ArgumentParser(description="Spreek2Schrijf Aligner", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-s','--speech', type=str,help="AudioDoc XML", action='store',default="",required=True)
-    parser.add_argument('-t','--transcript', type=str,help="Simplified VLOS XML", action='store',default="",required=True)
+    parser.add_argument('-t','--transcript', type=str,help="Conversational XML", action='store',default="",required=True)
     parser.add_argument('-S','--score', type=float,help="Smith-Waterman distance score threshold", action='store',default=0.8,required=False)
     parser.add_argument('-D','--ldthreshold', type=int,help="Levensthein distance score threshold for a word match", action='store',default=2,required=False)
     parser.add_argument('-d','--debug', help="Debug", action='store_true',default=False,required=False)
     args = parser.parse_args()
 
     audiodoc = AudioDoc(args.speech)
-    transcriptdoc = SimplifiedVLOSDoc(args.transcript)
+    transcriptdoc = CXMLDoc(args.transcript)
 
     print("{ 'sentence_pairs' : [")
     aligner = Aligner(args.debug)
