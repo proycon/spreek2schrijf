@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import sys
 import json
 import argparse
 import codecs
+import os.path
 import glob
 
 def main():
@@ -15,6 +17,7 @@ def main():
     schrijf = open(args.outputprefix +  ".schrijf.txt",'w',encoding='utf-8')
 
     for filename in glob.glob(args.inputdir + "/*.json"):
+        print(os.path.basename(filename),file=sys.stderr)
         with open(filename,'r',encoding='utf-8') as f:
             data = json.load(f)
             for sentencepair in data['sentence_pairs']:
