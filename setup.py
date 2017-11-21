@@ -18,7 +18,7 @@ setup(
     license = "GPL",
     keywords = "nlp computational_linguistics",
     url = "https://github.com/proycon/spreek2schrijf",
-    packages=['babelente'],
+    packages=['spreek2schrijf'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -31,6 +31,6 @@ setup(
     zip_safe=False,
     include_package_data=True,
     package_data = { },
-    install_requires=[  'python-ucto >= 0.2.2','python3-timbl','psutil','python-Levenshtein'],
+    install_requires=[  'python-ucto >= 0.2.2','python-Levenshtein','numpy'],
     entry_points = {    'console_scripts': [ 's2s-aligner = spreek2schrijf.aligner:main' ] }
 )
