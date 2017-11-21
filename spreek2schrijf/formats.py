@@ -7,7 +7,7 @@ class AudioDoc:
 
     def __iter__(self):
         for node in self.doc.xpath('//Word'):
-            yield node.text
+            yield node.text.strip()
 
 class SimplifiedVLOSDoc:
     def __init__(self, filename):
@@ -16,7 +16,7 @@ class SimplifiedVLOSDoc:
     def __iter__(self):
         for tekst in self.doc.xpath('//tekst'):
             for alinea in tekst.xpath('.//alinea/p'):
-                yield alinea.text
+                yield alinea.text.strip()
 
 class CXMLDoc:
     def __init__(self, filename):
@@ -29,4 +29,4 @@ class CXMLDoc:
             i = text.find(']')
             if i != -1 and i < 100:
                 text = text[i+1:]
-            yield text
+            yield text.strip()
