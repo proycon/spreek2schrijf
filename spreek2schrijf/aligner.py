@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
-import string
 import argparse
-import numpy as np
 import json
-import lxml.etree
+import numpy as np
 import Levenshtein
 import ucto
 from spreek2schrijf.formats import AudioDoc, CXMLDoc

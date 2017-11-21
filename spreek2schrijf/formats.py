@@ -1,4 +1,6 @@
 
+import lxml.etree
+
 class AudioDoc:
     def __init__(self, filename):
         self.doc = lxml.etree.parse(filename).getroot()

@@ -31,7 +31,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     package_data = { },
-    install_requires=[  'python-ucto >= 0.2.2','python-Levenshtein','numpy'],
+    install_requires=[  'python-ucto >= 0.2.2','python-Levenshtein','numpy','lxml'],
     entry_points = {    'console_scripts': [
         's2s-aligner = spreek2schrijf.aligner:main',
         's2s-buildparcorpus = spreek2schrijf.buildparcorpus:main',
