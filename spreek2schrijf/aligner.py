@@ -154,8 +154,9 @@ def main():
 
     print("{ \"sentence_pairs\" : [")
     aligner = Aligner(args.debug)
-    for transcriptsentence, asrsentence, score in aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold):
-        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False)+",")
+    for i, (transcriptsentence, asrsentence, score) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
+        if i > 0: print(",")
+        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False))
         if aligner.total and not args.debug:
             print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
     print("]}")
