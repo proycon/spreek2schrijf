@@ -7,7 +7,7 @@ command line:  /vol/customopt/machine-translation/mtevalscripts//eval/WER_v01.pl
     tst set "name" (1 systems)
 
 
-WER score = 26.0592 for system "sysid1"
+WER score = 25.7413 for system "sysid1"
 
 #####--- PER results ---#####
 command line:  /vol/customopt/machine-translation/mtevalscripts//eval/PER_v01.pl -r ../aligned200/corpus.schrijf.test.txt.sgm -t out.sgm -s ../aligned200/corpus.spraak.test.txt.sgm
@@ -17,23 +17,23 @@ command line:  /vol/customopt/machine-translation/mtevalscripts//eval/PER_v01.pl
     tst set "name" (1 systems)
 
 
-PER score = 21.0619 for system "sysid1"
+PER score = 20.9593 for system "sysid1"
 
 #####--- BLEU results ---#####
 bleu-1.04.pl  -t out.sgm -r ../aligned200/corpus.schrijf.test.txt.sgm -s ../aligned200/corpus.spraak.test.txt.sgm -ci 
 Systems seen: sysid1. Evaluating sysid1
-Add -0.0170 and +0.0170 to BLEU below for 95% confidence level
+Add -0.0155 and +0.0155 to BLEU below for 95% confidence level
 
 
 System,sysid1
 SegsScored,500
-SysWords,7199
-Ref2SysLen,1.0229
-1-gPrec,0.8571
-2-gPrec,0.7291
-3-gPrec,0.6247
-4-gPrec,0.5313
-PrecScore,0.6748
-BrevityPenalty,0.9773
-BLEUr1n4,0.6595
+SysWords,6635
+Ref2SysLen,1.0369
+1-gPrec,0.8645
+2-gPrec,0.7415
+3-gPrec,0.6338
+4-gPrec,0.5375
+PrecScore,0.6836
+BrevityPenalty,0.9637
+BLEUr1n4,0.6588
 
