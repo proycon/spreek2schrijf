@@ -5,7 +5,6 @@ import argparse
 import json
 import numpy as np
 import Levenshtein
-import ucto
 from spreek2schrijf.formats import AudioDoc, CXMLDoc
 
 MARGIN = 1000
@@ -143,77 +142,6 @@ class TimeAligner:
             if sentence is not None:
                 buffer = (sentence.split(' '), begin)
 
-class SmithWatermanAligner: #now obsolete
-
-    def __init__(self,debug=False):
-        self.loss = 0
-        self.total = 0
-        self.tokenizer = ucto.Tokenizer('tokconfig-nld', paragraphdetection=False)
-        self.debug = debug
-
-    def processbuffer(self, match,score, cursor_newbegin, transcriptsentence, audiowords):
-        if self.buffer:
-            #yield previous instance
-            prevtranscript, prevmatch, prevscore,  cursor_end = self.buffer
-            if score >= 0.75 and match and transcriptsentence and match[0].lower() == transcriptsentence[0][0].lower():
-                gap = cursor_newbegin - cursor_end
-                print("       GAP: ", gap,file=sys.stderr)
-                if gap > 0 and gap < 3:
-                    tail = audiowords[cursor_end:cursor_newbegin]
-                    if tail:
-                        if self.debug:
-                            print("      TAIL: ", " ".join(tail),file=sys.stderr)
-                        prevmatch += tail
-            self.buffer = None
-            return " ".join(prevtranscript), " ".join(prevmatch), prevscore
-        return None
-
-    def __call__(self,transcriptdoc, audiodoc, score_threshold, ldthreshold):
-        audiowords = list(audiodoc)
-        print("Words in ASR output: ",len(audiowords),file=sys.stderr)
-        paragraphs = list(transcriptdoc)
-        window = audiowords[:MARGIN]
-        cursor = 0
-        self.buffer = None
-        for i, paragraph in enumerate(paragraphs):
-            #pass paragraph to tokeniser
-            print("PROCESSING #" + str(i) + "/" + str(len(paragraphs)) + ":",  paragraph,file=sys.stderr)
-            self.tokenizer.process(paragraph)
-            transcriptsentence = []
-            for token in self.tokenizer:
-                transcriptsentence.append( (str(token), token.type()) )
-                if token.isendofsentence():
-                    match, score, offset = find_sequence(window, [ word for word, wordtype in transcriptsentence if wordtype != 'PUNCTUATION' ] , ldthreshold=ldthreshold)
-                    self.total += 1
-                    if score >= score_threshold:
-                        cursor_begin = (cursor + offset) - len(match)
-                        assert audiowords[cursor_begin] == match[0]
-                        result = self.processbuffer(match,score,cursor_begin, transcriptsentence, audiowords)
-                        if result: yield result
-                        if self.debug:
-                            print("------------------------------------------------------------------------------",file=sys.stderr)
-                            print("TRANSCRIPT: ", " ".join([ word for word, wordtype in transcriptsentence]) ,file=sys.stderr)
-                            print("       ASR: ", " ".join(match) ,file=sys.stderr)
-                            print("     SCORE: ", score,file=sys.stderr)
-                            print("  PROGRESS: ", round((cursor / len(audiowords))*100,1), '%',file=sys.stderr)
-                            print("      LOSS: ", round((self.loss / self.total) * 100,1), "%", file=sys.stderr)
-                            print("    CURSOR: ", cursor,file=sys.stderr)
-                            print("   +OFFSET: ", cursor+offset,file=sys.stderr)
-                            print("    WINDOW: ", " ".join(window[:10]) + " ...",file=sys.stderr)
-                        cursor_end = cursor + offset
-                        if len(transcriptsentence) >= 10 and score >= 0.85:
-                            #we have a strong alignment, reset the cursor for next batch
-                            cursor += offset
-                            window = audiowords[cursor:cursor+MARGIN]
-                            if self.debug:
-                                print("NXT WINDOW: ", " ".join(window[:10]) + " ...",file=sys.stderr)
-                        #we buffer the instance rather than yielding it immediately
-                        self.buffer = ([ word for word, wordtype in transcriptsentence], match, score, cursor_end)
-                    else:
-                        self.loss += 1
-                    transcriptsentence = []
-            result = self.processbuffer(match,score,cursor+offset, transcriptsentence, audiowords)
-            if result: yield result
 
 def main():
     parser = argparse.ArgumentParser(description="Spreek2Schrijf Aligner", formatter_class=argparse.ArgumentDefaultsHelpFormatter)

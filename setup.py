@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "Spreek2Schrijf",
-    version = "0.1",
+    version = "0.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Scripts"),
