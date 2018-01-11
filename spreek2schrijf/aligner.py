@@ -25,7 +25,7 @@ def wordmatch(s1,s2, threshold=2):
 
 
 #adapted from http://climberg.de/page/smith-waterman-distance-for-feature-extraction-in-nlp/ (by Christian Limbergs)
-def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=True, ldthreshold=2):
+def smith_waterman_distance(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=True, ldthreshold=2):
     """Smith Waterman algorithm"""
     # switch sequences, so that seq1 is the longer sequence to search for seq2
     if len(seq2) > len(seq1): seq1, seq2 = seq2, seq1
@@ -48,9 +48,13 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
             )
     # the maximum of mat is now the score, which is returned raw or normalized (with a range of 0-1)
     score = np.max(mat) / (len(seq2) * match) if normalize_score else np.max(mat)
+    return score, mat
+
+def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=True, ldthreshold=2):
+    score, mat = smith_waterman(seq1,seq2,match,mismatch,insertion,deletion,normalize_score, ldthreshold)
 
     if score:
-        #backtrack (was not in original implementation)
+        #backtrack step (was not in original implementation)
         i, j = np.unravel_index(np.argmax(mat), mat.shape)
         matchseq = []
 
@@ -86,32 +90,48 @@ class TimeAligner:
             print("           asr word count:", len(audiowords),file=sys.stderr)
             print("transcript sentence count:", len(sentences), file=sys.stderr)
         begin = 0
+        sentences.append((None,None,None)) #stop dummy
         for i, (sentence, transcriptstart, transcriptend) in enumerate(sentences):
-            print("PROCESSING #" + str(i+1) + "/" + str(len(sentences)) + ":",  sentence,file=sys.stderr)
-            for j, (audioword, audiostart, audioend) in enumerate(audiowords):
-                if j >= begin:
-                    if audiostart >= transcriptstart:
-                        if self.debug:
-                            print("-------------------------------------------------------",file=sys.stderr)
-                            print("     TRANSCRIPT: ", sentence,file=sys.stderr)
-                            print(" ASR FIRST WORD: ", j, audioword,file=sys.stderr)
-                            print(" ASR EXCERPT: ", " ".join([ w for w,_,_ in audiowords[j:j+10]]), audioword,file=sys.stderr)
-                            print("TRANSCRIPTSTART: ", transcriptstart,file=sys.stderr)
-                            print("     AUDIOSTART: ", audiostart,file=sys.stderr)
-                        begin = j
-                        break
+            if sentence is None:
+                begin = len(audiowords)
+            else:
+                print("PROCESSING #" + str(i+1) + "/" + str(len(sentences)) + ":",  sentence,file=sys.stderr)
+                #Find strict begin according to timestamp
+                for j, (audioword, audiostart, audioend) in enumerate(audiowords):
+                    if j >= begin:
+                        if audiostart >= transcriptstart:
+                            if self.debug:
+                                print("-------------------------------------------------------",file=sys.stderr)
+                                print("     TRANSCRIPT: ", sentence,file=sys.stderr)
+                                print(" ASR FIRST WORD: ", j, audioword,file=sys.stderr)
+                                print("    ASR EXCERPT: ", " ".join([ w for w,_,_ in audiowords[j:j+10]]), "...",file=sys.stderr)
+                                print("TRANSCRIPTSTART: ", transcriptstart,file=sys.stderr)
+                                print("     AUDIOSTART: ", audiostart,file=sys.stderr)
+                            begin = j
+                            break
             if buffer is not None:
                 transcriptsentence, audiobegin = buffer
-                asrsentence = " ".join([ w for w,_,_ in audiowords[audiobegin:begin]])
-                yield transcriptsentence, asrsentence
-            buffer = (sentence, begin)
+                #flexibility step, see if moving the end point earlier helps:
+                scores = []
+                #for j in range(-5,5):
+                #    if begin+j > audiobegin:
+                #        asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin+j]]
+                #        score, mat = smith_waterman_distance(sentence.split(' '), asrsentence)
+                #        scores.append( (j, score, asrsentence) )
 
-        #don't forget the last one:
-        if buffer is not None:
-            transcriptsentence, audiobegin = buffer
-            asrsentence = " ".join([ w for w,_,_ in audiowords[audiobegin:]])
-            yield transcriptsentence, asrsentence
+                #no flexibility step
+                asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin]]
+                scores.append( (0, smith_waterman_distance(transcriptsentence, asrsentence)[0], asrsentence))
 
+                offset, score, asrsentence = max(scores, key=lambda x:x[1])
+                begin += offset
+                if self.debug:
+                    print("BEST FLEXIBILITY OFFSET: ", offset,file=sys.stderr)
+                if score >= score_threshold:
+                    yield " ".join(transcriptsentence), " ".join(asrsentence), score
+                elif self.debug:
+                    print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), score, file=sys.stderr)
+            buffer = (sentence.split(' '), begin)
 
 class SmithWatermanAligner: #now obsolete
 
@@ -199,9 +219,9 @@ def main():
 
     print("{ \"sentence_pairs\" : [")
     aligner = TimeAligner(args.debug)
-    for i, (transcriptsentence, asrsentence) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
+    for i, (transcriptsentence, asrsentence,score) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
         if i > 0: print(",")
-        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence}, indent=4, ensure_ascii=False))
+        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score":score}, indent=4, ensure_ascii=False))
         if aligner.total and not args.debug:
             print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
     print("]}")
