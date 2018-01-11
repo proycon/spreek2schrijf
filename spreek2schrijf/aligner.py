@@ -130,8 +130,9 @@ class TimeAligner:
                     print("BEST FLEXIBILITY OFFSET: ", offset,file=sys.stderr)
                 if score >= score_threshold:
                     yield " ".join(transcriptsentence), " ".join(asrsentence), score
-                elif self.debug:
-                    print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), score, file=sys.stderr)
+                else:
+                    if self.debug:
+                        print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), score, file=sys.stderr)
                     self.loss += 1
             if sentence is not None:
                 buffer = (sentence.split(' '), begin)
