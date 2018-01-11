@@ -48,6 +48,7 @@ def smith_waterman_distance(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, de
             )
     # the maximum of mat is now the score, which is returned raw or normalized (with a range of 0-1)
     score = np.max(mat) / (len(seq2) * match) if normalize_score else np.max(mat)
+    score *= len(seq2) / len(seq1)
     return score, mat
 
 def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.5, normalize_score=True, ldthreshold=2):
@@ -113,15 +114,15 @@ class TimeAligner:
                 transcriptsentence, audiobegin = buffer
                 #flexibility step, see if moving the end point earlier helps:
                 scores = []
-                #for j in range(-5,5):
-                #    if begin+j > audiobegin:
-                #        asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin+j]]
-                #        score, mat = smith_waterman_distance(transcriptsentence, asrsentence)
-                #        scores.append( (j, score, asrsentence) )
+                for j in range(-5,5):
+                    if begin+j > audiobegin:
+                        asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin+j]]
+                        score, mat = smith_waterman_distance(transcriptsentence, asrsentence)
+                        scores.append( (j, float(score), asrsentence) )
 
                 #no flexibility step
-                asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin]]
-                scores.append( (0, smith_waterman_distance(transcriptsentence, asrsentence)[0], asrsentence))
+                #asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin]]
+                #scores.append( (0, smith_waterman_distance(transcriptsentence, asrsentence)[0], asrsentence))
 
                 offset, score, asrsentence = max(scores, key=lambda x:x[1])
                 begin += offset
@@ -134,7 +135,7 @@ class TimeAligner:
                 if self.debug:
                     print("BEST FLEXIBILITY OFFSET: ", offset, " SCORE=",score,file=sys.stderr)
                 if score >= score_threshold:
-                    yield " ".join(transcriptsentence), " ".join(asrsentence), score
+                    yield " ".join(transcriptsentence), " ".join(asrsentence), score, offset
                 else:
                     if self.debug:
                         print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), score, file=sys.stderr)
@@ -228,9 +229,9 @@ def main():
 
     print("{ \"sentence_pairs\" : [")
     aligner = TimeAligner(args.debug)
-    for i, (transcriptsentence, asrsentence,score) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
+    for i, (transcriptsentence, asrsentence,score, offset) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
         if i > 0: print(",")
-        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score":score}, indent=4, ensure_ascii=False))
+        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score":score, "offset": offset}, indent=4, ensure_ascii=False))
     print("]}")
     if aligner.total:
         print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
