@@ -75,6 +75,7 @@ class TimeAligner:
     def __init__(self,debug=False):
         self.loss = 0
         self.total = 0
+        self.scores = []
         self.debug = debug
 
 
@@ -85,7 +86,6 @@ class TimeAligner:
         cursor = 0
         buffer = None
         sentences = list(transcriptdoc)
-        print(sentences)
         if self.debug:
             print("           asr word count:", len(audiowords),file=sys.stderr)
             print("transcript sentence count:", len(sentences), file=sys.stderr)
@@ -116,7 +116,7 @@ class TimeAligner:
                 #for j in range(-5,5):
                 #    if begin+j > audiobegin:
                 #        asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin+j]]
-                #        score, mat = smith_waterman_distance(sentence.split(' '), asrsentence)
+                #        score, mat = smith_waterman_distance(transcriptsentence, asrsentence)
                 #        scores.append( (j, score, asrsentence) )
 
                 #no flexibility step
@@ -126,8 +126,13 @@ class TimeAligner:
                 offset, score, asrsentence = max(scores, key=lambda x:x[1])
                 begin += offset
                 self.total += 1
+                if np.isnan(score):
+                    score = 0.0
+                    self.scores.append(0.0)
+                else:
+                    self.scores.append(score)
                 if self.debug:
-                    print("BEST FLEXIBILITY OFFSET: ", offset,file=sys.stderr)
+                    print("BEST FLEXIBILITY OFFSET: ", offset, " SCORE=",score,file=sys.stderr)
                 if score >= score_threshold:
                     yield " ".join(transcriptsentence), " ".join(asrsentence), score
                 else:
@@ -229,6 +234,7 @@ def main():
     print("]}")
     if aligner.total:
         print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
+        print("AV SCORE: ", round((sum(aligner.scores) / len(aligner.scores)),2), " (prior to pruning)", file=sys.stderr)
 
 
 if __name__ == '__main__':
