@@ -67,8 +67,53 @@ def find_sequence(seq1, seq2, match=3, mismatch=-1, insertion=-0.5, deletion=-0.
 
 
 
+class TimeAligner:
+    def __init__(self,debug=False):
+        self.loss = 0
+        self.total = 0
+        self.debug = debug
 
-class Aligner:
+
+    def __call__(self,transcriptdoc, audiodoc, score_threshold, ldthreshold):
+        audiowords = list(audiodoc)
+        #print("Words in ASR output: ",len(audiowords),file=sys.stderr)
+        window = audiowords[:MARGIN]
+        cursor = 0
+        buffer = None
+        sentences = list(transcriptdoc)
+        print(sentences)
+        if self.debug:
+            print("           asr word count:", len(audiowords),file=sys.stderr)
+            print("transcript sentence count:", len(sentences), file=sys.stderr)
+        begin = 0
+        for i, (sentence, transcriptstart, transcriptend) in enumerate(sentences):
+            print("PROCESSING #" + str(i+1) + "/" + str(len(sentences)) + ":",  sentence,file=sys.stderr)
+            for j, (audioword, audiostart, audioend) in enumerate(audiowords):
+                if j >= begin:
+                    if audiostart >= transcriptstart:
+                        if self.debug:
+                            print("-------------------------------------------------------",file=sys.stderr)
+                            print("     TRANSCRIPT: ", sentence,file=sys.stderr)
+                            print(" ASR FIRST WORD: ", j, audioword,file=sys.stderr)
+                            print(" ASR EXCERPT: ", " ".join([ w for w,_,_ in audiowords[j:j+10]]), audioword,file=sys.stderr)
+                            print("TRANSCRIPTSTART: ", transcriptstart,file=sys.stderr)
+                            print("     AUDIOSTART: ", audiostart,file=sys.stderr)
+                        begin = j
+                        break
+            if buffer is not None:
+                transcriptsentence, audiobegin = buffer
+                asrsentence = " ".join([ w for w,_,_ in audiowords[audiobegin:begin]])
+                yield transcriptsentence, asrsentence
+            buffer = (sentence, begin)
+
+        #don't forget the last one:
+        if buffer is not None:
+            transcriptsentence, audiobegin = buffer
+            asrsentence = " ".join([ w for w,_,_ in audiowords[audiobegin:]])
+            yield transcriptsentence, asrsentence
+
+
+class SmithWatermanAligner: #now obsolete
 
     def __init__(self,debug=False):
         self.loss = 0
@@ -153,10 +198,10 @@ def main():
     transcriptdoc = CXMLDoc(args.transcript)
 
     print("{ \"sentence_pairs\" : [")
-    aligner = Aligner(args.debug)
-    for i, (transcriptsentence, asrsentence, score) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
+    aligner = TimeAligner(args.debug)
+    for i, (transcriptsentence, asrsentence) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
         if i > 0: print(",")
-        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score": score}, indent=4, ensure_ascii=False))
+        print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence}, indent=4, ensure_ascii=False))
         if aligner.total and not args.debug:
             print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
     print("]}")
