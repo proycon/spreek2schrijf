@@ -125,13 +125,16 @@ class TimeAligner:
 
                 offset, score, asrsentence = max(scores, key=lambda x:x[1])
                 begin += offset
+                self.total += 1
                 if self.debug:
                     print("BEST FLEXIBILITY OFFSET: ", offset,file=sys.stderr)
                 if score >= score_threshold:
                     yield " ".join(transcriptsentence), " ".join(asrsentence), score
                 elif self.debug:
                     print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), score, file=sys.stderr)
-            buffer = (sentence.split(' '), begin)
+                    self.loss += 1
+            if sentence is not None:
+                buffer = (sentence.split(' '), begin)
 
 class SmithWatermanAligner: #now obsolete
 
@@ -222,9 +225,9 @@ def main():
     for i, (transcriptsentence, asrsentence,score) in enumerate(aligner(transcriptdoc, audiodoc, args.score, args.ldthreshold)):
         if i > 0: print(",")
         print(json.dumps({"transcript": transcriptsentence, "asr":asrsentence, "score":score}, indent=4, ensure_ascii=False))
-        if aligner.total and not args.debug:
-            print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
     print("]}")
+    if aligner.total:
+        print("LOSS: ", round((aligner.loss / aligner.total) * 100,2), "%", file=sys.stderr)
 
 
 if __name__ == '__main__':
