@@ -219,8 +219,8 @@ def main():
     parser = argparse.ArgumentParser(description="Spreek2Schrijf Aligner", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-s','--speech', type=str,help="AudioDoc XML", action='store',default="",required=True)
     parser.add_argument('-t','--transcript', type=str,help="Conversational XML", action='store',default="",required=True)
-    parser.add_argument('-S','--score', type=float,help="Smith-Waterman distance score threshold", action='store',default=0.8,required=False)
-    parser.add_argument('-D','--ldthreshold', type=int,help="Levensthein distance score threshold for a word match", action='store',default=2,required=False)
+    parser.add_argument('-S','--score', type=float,help="Smith-Waterman distance score threshold", action='store',default=0.5,required=False)
+    parser.add_argument('-D','--ldthreshold', type=int,help=argparse.SUPPRESS, action='store',default=2,required=False) #obsolete
     parser.add_argument('-d','--debug', help="Debug", action='store_true',default=False,required=False)
     args = parser.parse_args()
 
