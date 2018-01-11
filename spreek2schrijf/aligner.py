@@ -137,7 +137,7 @@ class TimeAligner:
                     yield " ".join(transcriptsentence), " ".join(asrsentence), score, offset
                 else:
                     if self.debug:
-                        print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), score, file=sys.stderr)
+                        print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), file=sys.stderr)
                     self.loss += 1
             if sentence is not None:
                 buffer = (sentence.split(' '), begin)
