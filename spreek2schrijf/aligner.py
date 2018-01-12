@@ -123,22 +123,23 @@ class TimeAligner:
                 #asrsentence = [ w for w,_,_ in audiowords[audiobegin:begin]]
                 #scores.append( (0, smith_waterman_distance(transcriptsentence, asrsentence)[0], asrsentence))
 
-                offset, score, asrsentence = max(scores, key=lambda x:x[1])
-                begin += offset
-                self.total += 1
-                if np.isnan(score):
-                    score = 0.0
-                    self.scores.append(0.0)
-                else:
-                    self.scores.append(score)
-                if self.debug:
-                    print("BEST FLEXIBILITY OFFSET: ", offset, " SCORE=",score,file=sys.stderr)
-                if score >= score_threshold:
-                    yield " ".join(transcriptsentence), " ".join(asrsentence), score, offset
-                else:
+                if scores:
+                    offset, score, asrsentence = max(scores, key=lambda x:x[1])
+                    begin += offset
+                    self.total += 1
+                    if np.isnan(score):
+                        score = 0.0
+                        self.scores.append(0.0)
+                    else:
+                        self.scores.append(score)
                     if self.debug:
-                        print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), file=sys.stderr)
-                    self.loss += 1
+                        print("BEST FLEXIBILITY OFFSET: ", offset, " SCORE=",score,file=sys.stderr)
+                    if score >= score_threshold:
+                        yield " ".join(transcriptsentence), " ".join(asrsentence), score, offset
+                    else:
+                        if self.debug:
+                            print("Score threshold not met. SCORE=", score, "TRANSCRIPT="," ".join(transcriptsentence), "ASR=", " ".join(asrsentence), file=sys.stderr)
+                        self.loss += 1
             if sentence is not None:
                 buffer = (sentence.split(' '), begin)
 
