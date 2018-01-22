@@ -23,13 +23,13 @@
 #file for you, unlike this template. Using Python is recommended for more
 #complex webservices and for additional security.
 
-#this script takes three arguments from CLAM: $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY. (as configured at COMMAND= in the service configuration file)
+#this script takes three arguments from CLAM: $STATUSFILE $INPUTDIRECTORYECTORY $OUTPUTDIRECTORYECTORY. (as configured at COMMAND= in the service configuration file)
 STATUSFILE=$1
-INPUTDIRECTORY=$2
-OUTPUTDIRECTORY=$3
-SCRATCHDIRECTORY=$4
+INPUTDIRECTORYECTORY=$2
+OUTPUTDIRECTORYECTORY=$3
+SCRATCHDIRECTORYECTORY=$4
 WEBSERVICEDIR=$5
-mkdir -p $SCRATCHDIRECTORY
+mkdir -p $SCRATCHDIRECTORYECTORY
 
 #If $PARAMETERS was passed COMMAND= in the service configuration file, the remainder of the arguments are custom parameters for which you either need to do your own parsing, or you pass them directly to your application
 # PARAMETERS=${@:4}
@@ -65,32 +65,31 @@ else
     exit 2
 fi
 KALDI_root=$KALDI_main/egs/Kaldi_NL
-inputdir=$1
-scratchdir=$2
-outdir=$3
 
 cd $KALDI_root
-for inputfile in $inputdir/*; do
+for inputfile in $INPUTDIRECTORY/*; do
   filename=$(basename "$inputfile")
   extension="${filename##*.}"
   file_id=$(basename "$inputfile" .$extension)
   echo "Audio conversion $filename..." >&2
   echo "Audio conversion $filename..." >> $STATUSFILE
-  sox $inputfile -e signed-integer -c 1 -r 16000 -b 16 $scratchdir/${file_id}.wav
-  target_dir=$scratchdir/${file_id}_$(date +"%y_%m_%d_%H_%m_%S")
+  sox $inputfile -e signed-integer -c 1 -r 16000 -b 16 $SCRATCHDIRECTORY/${file_id}.wav
+  target_dir=$SCRATCHDIRECTORY/${file_id}_$(date +"%y_%m_%d_%H_%m_%S")
   mkdir -p $target_dir
   echo "ASR Decoding $filename..." >&2
   echo "ASR Decoding $filename..." >> $STATUSFILE
-  ./decode_PR.sh $scratchdir/${file_id}.wav $target_dir
-  cat $target_dir/${file_id}.txt | cut -d'(' -f 1 > $outdir/${file_id}.spraak.txt
-  cp $target_dir/1Best.ctm $outdir/${file_id}.ctm
-  cat $outdir/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $outdir/${file_id}.sent
-  $S2SDIR/spreek2schrijf/webservice/scripts/ctm2xml.py $outdir $file_id $scratchdir
-  sed -e 's/path=/path=$S2SDIR\/model/g' $S2SDIR/model/moses.ini > $scratchdir/moses.ini
+  ./decode_PR.sh $SCRATCHDIRECTORY/${file_id}.wav $target_dir
+  cat $target_dir/${file_id}.txt | cut -d'(' -f 1 > $OUTPUTDIRECTORY/${file_id}.spraak.txt
+  cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
+  cat $OUTPUTDIRECTORY/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $OUTPUTDIRECTORY/${file_id}.sent
+  $S2SDIR/spreek2schrijf/webservice/scripts/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
+  sed -e 's/path=/path='$S2SDIR'\/model/g' $S2SDIR/model/moses.ini > $SCRATCHDIRECTORY/moses.ini
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
-  $MOSESDIR/moses -f $scratchdir/moses.ini  < $outdir/${file_id}.spraak.txt > $outdir/${file_id}.schrijf.txt
-  rm -Rf $target_dir
+  $MOSESDIR/moses -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
+  if [ -d $target_dir ]; then
+      rm -Rf $target_dir
+  fi
 done
 cd -
 
