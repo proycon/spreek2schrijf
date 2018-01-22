@@ -23,13 +23,13 @@
 #file for you, unlike this template. Using Python is recommended for more
 #complex webservices and for additional security.
 
-#this script takes three arguments from CLAM: $STATUSFILE $INPUTDIRECTORYECTORY $OUTPUTDIRECTORYECTORY. (as configured at COMMAND= in the service configuration file)
+#this script takes three arguments from CLAM: $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY. (as configured at COMMAND= in the service configuration file)
 STATUSFILE=$1
-INPUTDIRECTORYECTORY=$2
-OUTPUTDIRECTORYECTORY=$3
-SCRATCHDIRECTORYECTORY=$4
+INPUTDIRECTORY=$2
+OUTPUTDIRECTORY=$3
+SCRATCHDIRECTORY=$4
 WEBSERVICEDIR=$5
-mkdir -p $SCRATCHDIRECTORYECTORY
+mkdir -p $SCRATCHDIRECTORY
 
 #If $PARAMETERS was passed COMMAND= in the service configuration file, the remainder of the arguments are custom parameters for which you either need to do your own parsing, or you pass them directly to your application
 # PARAMETERS=${@:4}
