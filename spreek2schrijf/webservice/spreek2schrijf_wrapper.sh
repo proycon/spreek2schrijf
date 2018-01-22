@@ -89,7 +89,7 @@ for inputfile in $inputdir/*; do
   sed -e 's/path=/path=$S2SDIR\/model/g' $S2SDIR/model/moses.ini > $scratchdir/moses.ini
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
-  $MOSESDIR/moses -f $scratchdir/moses.ini  < $outdir/${file_id}.spraak.txt > ${file_id}.schrijf.txt
+  $MOSESDIR/moses -f $scratchdir/moses.ini  < $outdir/${file_id}.spraak.txt > $outdir/${file_id}.schrijf.txt
 done
 cd -
 
