@@ -90,6 +90,7 @@ for inputfile in $inputdir/*; do
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
   $MOSESDIR/moses -f $scratchdir/moses.ini  < $outdir/${file_id}.spraak.txt > $outdir/${file_id}.schrijf.txt
+  rm -Rf $target_dir
 done
 cd -
 

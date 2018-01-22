@@ -157,6 +157,22 @@ STYLE = 'classic'
 
 #Define your profiles here. This is required for the project paradigm, but can be set to an empty list if you only use the action paradigm.
 
+outputtemplate_transcription = OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
+        SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+        extension='.spraak.txt', #set an extension or set a filename:
+        multi=True
+)
+outputtemplate_xml = OutputTemplate('TranscriptionXML',PlainTextFormat,'Automation transcription of the input recording (XML)',
+        extension='.xml', #set an extension or set a filename:
+        multi=True
+)
+
+outputtemplate_translation = OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
+        SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+        extension='.schrijf.txt', #set an extension or set a filename:
+        multi=True
+)
+
 PROFILES = [
     Profile(
         InputTemplate('InputWavFile',WaveAudioFormat,"Wav file",
@@ -171,12 +187,8 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.txt', #set an extension or set a filename:
-            #filename='filename.stats',
-            multi=True
-        ),
+        outputtemplate_transcription,
+        outputtemplate_translation
     ),
     #------------------------------------------------------------------------------------------------------------------------
     Profile(
@@ -192,12 +204,8 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.txt', #set an extension or set a filename:
-            #filename='filename.stats',
-            multi=True
-        ),
+        outputtemplate_transcription,
+        outputtemplate_translation
     ),
     #------------------------------------------------------------------------------------------------------------------------
     Profile(
@@ -213,12 +221,8 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.txt', #set an extension or set a filename:
-            #filename='filename.stats',
-            multi=True
-        ),
+        outputtemplate_transcription,
+        outputtemplate_translation
     )
 
 ]
