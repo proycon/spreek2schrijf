@@ -177,7 +177,7 @@ PROFILES = [
                 extension='.spraak.txt', #set an extension or set a filename:
                 multi=True
         ),
-        OutputTemplate('TranscriptionXML',PlainTextFormat,'Automation transcription of the input recording (XML)',
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
                 extension='.xml', #set an extension or set a filename:
                 multi=True
         ),
@@ -206,7 +206,7 @@ PROFILES = [
                 extension='.spraak.txt', #set an extension or set a filename:
                 multi=True
         ),
-        OutputTemplate('TranscriptionXML',PlainTextFormat,'Automation transcription of the input recording (XML)',
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
                 extension='.xml', #set an extension or set a filename:
                 multi=True
         ),
@@ -235,7 +235,7 @@ PROFILES = [
                 extension='.spraak.txt', #set an extension or set a filename:
                 multi=True
         ),
-        OutputTemplate('TranscriptionXML',PlainTextFormat,'Automation transcription of the input recording (XML)',
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
                 extension='.xml', #set an extension or set a filename:
                 multi=True
         ),
