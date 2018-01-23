@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/env python
 
 import xml.etree.cElementTree as ET
 import codecs, sys, pdb

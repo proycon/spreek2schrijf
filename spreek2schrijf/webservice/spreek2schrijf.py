@@ -157,6 +157,7 @@ STYLE = 'classic'
 
 #Define your profiles here. This is required for the project paradigm, but can be set to an empty list if you only use the action paradigm.
 
+
 PROFILES = [
     Profile(
         InputTemplate('InputWavFile',WaveAudioFormat,"Wav file",
@@ -172,11 +173,19 @@ PROFILES = [
         ),
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.txt', #set an extension or set a filename:
-            #filename='filename.stats',
-            multi=True
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.spraak.txt', #set an extension or set a filename:
+                multi=True
         ),
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
+                extension='.xml', #set an extension or set a filename:
+                multi=True
+        ),
+        OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.schrijf.txt', #set an extension or set a filename:
+                multi=True
+        )
     ),
     #------------------------------------------------------------------------------------------------------------------------
     Profile(
@@ -193,15 +202,23 @@ PROFILES = [
         ),
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.txt', #set an extension or set a filename:
-            #filename='filename.stats',
-            multi=True
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.spraak.txt', #set an extension or set a filename:
+                multi=True
         ),
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
+                extension='.xml', #set an extension or set a filename:
+                multi=True
+        ),
+        OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.schrijf.txt', #set an extension or set a filename:
+                multi=True
+        )
     ),
     #------------------------------------------------------------------------------------------------------------------------
     Profile(
-        InputTemplate('InputOggFile',MP3AudioFormat,"Ogg file",
+        InputTemplate('InputOggFile',OggAudioFormat,"Ogg file",
             #StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'), #note that encoding is required if you work with PlainTextFormat
             #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
             #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
@@ -214,11 +231,19 @@ PROFILES = [
         ),
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.txt', #set an extension or set a filename:
-            #filename='filename.stats',
-            multi=True
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.spraak.txt', #set an extension or set a filename:
+                multi=True
         ),
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
+                extension='.xml', #set an extension or set a filename:
+                multi=True
+        ),
+        OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.schrijf.txt', #set an extension or set a filename:
+                multi=True
+        )
     )
 
 ]
