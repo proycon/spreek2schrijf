@@ -54,11 +54,11 @@ echo "Starting..." >> $STATUSFILE
 
 if [[ $(hostname) == "mlp01" ]]; then
     KALDI_main=/var/www/lamachine/src/kaldi
-    S2SDIR=/var/www/webservices-lst/live/repo/spreek2schrijf
+    export S2SDIR=/var/www/webservices-lst/live/repo/spreek2schrijf
     MOSESDIR=/vol/customopt/machine-translation/bin
 elif [[ ${hostname:0:3} == "mlp" ]]; then
     KALDI_main=/vol/customopt/lamachine.dev/kaldi
-    S2SDIR=$(realpath ../../)
+    export S2SDIR=$(realpath ../../)
     MOSESDIR=/vol/customopt/machine-translation/bin
 else
     echo "Specify KALDI_main!" >&2
@@ -83,7 +83,7 @@ for inputfile in $INPUTDIRECTORY/*; do
   cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
   cat $OUTPUTDIRECTORY/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $OUTPUTDIRECTORY/${file_id}.sent
   $S2SDIR/spreek2schrijf/webservice/scripts/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
-  sed -e 's/path=/path='$S2SDIR'\/model/g' $S2SDIR/model/moses.ini > $SCRATCHDIRECTORY/moses.ini
+  sed -e "s/path=/path=$S2SDIR\/model/g" $S2SDIR/model/moses.ini > $SCRATCHDIRECTORY/moses.ini
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
   $MOSESDIR/moses -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
