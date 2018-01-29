@@ -49,6 +49,8 @@ SYSTEM_NAME = "Spreek2Schrijf"
 #An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML)
 SYSTEM_DESCRIPTION = "Deze webservice gebruikt spraakherkenning om opnamen in de Tweede Kamer om te zetten in een spraaktranscriptie, en een vertaalengine om deze vervolgens naar schrijftaal om te zetten."
 
+CUSTOMHTML_PROJECTSTART = "Let op: De geüploade audio bestanden mogen <strong>geen</strong> spaties bevatten!"
+
 # ================ Server specific configuration for CLAM ===============
 host = os.uname()[1]
 if 'VIRTUAL_ENV' in os.environ:
