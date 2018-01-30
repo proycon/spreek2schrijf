@@ -30,11 +30,13 @@ with open(sys.argv[1],'r',encoding='utf-8') as f:
                 ngram = " ".join(words[i:i+l])
                 key = ngram.lower()
                 if key in names:
-                    print("  Found name " + names[key],file=sys.stderr)
+                    if ngram != names[key]:
+                        print("  Corrected name " + names[key],file=sys.stderr)
                     found = True
                     newwords += names[key].split(' ')
                 elif key in substitutions:
-                    print("  Found substitution " + key + " -> " + substitutions[key],file=sys.stderr)
+                    if ngram != substitutions[key]:
+                        print("  Applied substitution " + key + " -> " + substitutions[key],file=sys.stderr)
                     found = True
                     newwords.append(substitutions[key])
                 if found:
