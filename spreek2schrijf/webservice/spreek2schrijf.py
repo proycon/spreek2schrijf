@@ -176,16 +176,19 @@ PROFILES = [
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                removeextensions=['.wav','.mp3','.ogg'],
                 extension='.spraak.txt', #set an extension or set a filename:
                 multi=True
         ),
         OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
                 extension='.xml', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         ),
         OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.schrijf.txt', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         )
     ),
@@ -206,15 +209,18 @@ PROFILES = [
         OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.spraak.txt', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         ),
         OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
                 extension='.xml', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         ),
         OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.schrijf.txt', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         )
     ),
@@ -235,15 +241,18 @@ PROFILES = [
         OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.spraak.txt', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         ),
         OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
                 extension='.xml', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         ),
         OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.schrijf.txt', #set an extension or set a filename:
+                removeextensions=['.wav','.mp3','.ogg'],
                 multi=True
         )
     )
