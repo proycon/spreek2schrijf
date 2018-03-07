@@ -88,7 +88,7 @@ for inputfile in $INPUTDIRECTORY/*; do
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
   $MOSESDIR/moses -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt
-  $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
+  $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
   if [ -d $target_dir ]; then
       rm -Rf $target_dir
   fi
