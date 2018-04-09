@@ -71,16 +71,20 @@ for inputfile in $INPUTDIRECTORY/*; do
   filename=$(basename "$inputfile")
   extension="${filename##*.}"
   file_id=$(basename "$inputfile" .$extension)
-  echo "Audio conversion $filename..." >&2
-  echo "Audio conversion $filename..." >> $STATUSFILE
-  sox $inputfile -e signed-integer -c 1 -r 16000 -b 16 $SCRATCHDIRECTORY/${file_id}.wav
-  target_dir=$SCRATCHDIRECTORY/${file_id}_$(date +"%y_%m_%d_%H_%m_%S")
-  mkdir -p $target_dir
-  echo "ASR Decoding $filename..." >&2
-  echo "ASR Decoding $filename..." >> $STATUSFILE
-  ./decode_PR.sh $SCRATCHDIRECTORY/${file_id}.wav $target_dir
-  cat $target_dir/${file_id}.txt | cut -d'(' -f 1 > $OUTPUTDIRECTORY/${file_id}.spraak.txt
-  cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
+  if [ "$extension" = "ctm" ]; then
+      cp $inputfile $OUTPUTDIRECTORY/${file_id}.ctm
+  else
+      echo "Audio conversion $filename..." >&2
+      echo "Audio conversion $filename..." >> $STATUSFILE
+      sox $inputfile -e signed-integer -c 1 -r 16000 -b 16 $SCRATCHDIRECTORY/${file_id}.wav
+      target_dir=$SCRATCHDIRECTORY/${file_id}_$(date +"%y_%m_%d_%H_%m_%S")
+      mkdir -p $target_dir
+      echo "ASR Decoding $filename..." >&2
+      echo "ASR Decoding $filename..." >> $STATUSFILE
+      ./decode_PR.sh $SCRATCHDIRECTORY/${file_id}.wav $target_dir
+      cat $target_dir/${file_id}.txt | cut -d'(' -f 1 > $OUTPUTDIRECTORY/${file_id}.spraak.txt
+      cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
+  fi
   cat $OUTPUTDIRECTORY/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $OUTPUTDIRECTORY/${file_id}.sent #currently computed but ignored!!!
   $S2SDIR/spreek2schrijf/webservice/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
   sed -e "s|path=|path=$S2SDIR/model/|g" $S2SDIR/model/moses.ini > $SCRATCHDIRECTORY/moses.ini

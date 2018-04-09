@@ -137,12 +137,12 @@ STYLE = 'classic'
 #In CUSTOM_FORMATS you can specify a list of Python classes corresponding to extra formats.
 #You can define the classes first, and then put them in CUSTOM_FORMATS, as shown in this example:
 
-#class MyXMLFormat(CLAMMetaData):
-#    attributes = {}
-#    name = "My XML format"
-#    mimetype = 'text/xml'
+class CTMFormat(CLAMMetaData):
+    attributes = {}
+    name = "Conversation Time Marked File"
+    mimetype = 'text/xml'
 
-# CUSTOM_FORMATS = [ MyXMLFormat ]
+ CUSTOM_FORMATS = [ CTMFormat ]
 
 # ======= INTERFACE OPTIONS ===========
 
@@ -253,6 +253,38 @@ PROFILES = [
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.schrijf.txt', #set an extension or set a filename:
                 removeextensions=['.wav','.mp3','.ogg'],
+                multi=True
+        )
+    ),
+    #------------------------------------------------------------------------------------------------------------------------
+    Profile(
+        InputTemplate('InputCTM',CTMFormat,"Speech recognition output (conversation time marked)",
+            #StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'), #note that encoding is required if you work with PlainTextFormat
+            #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
+            #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
+            #CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
+            #MP3toWaveConverter(id='mp3conv',label='Convert from MP3 File using sox'),
+            #OggtoWaveConverter(id='oggconv',label='Convert from OGG File using sox'),
+            extension='.ctm',
+            #filename='filename.txt',
+            multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
+        ),
+        #------------------------------------------------------------------------------------------------------------------------
+        OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.spraak.txt', #set an extension or set a filename:
+                removeextensions=['.ctm'],
+                multi=True
+        ),
+        OutputTemplate('TranscriptionXML',UndefinedXMLFormat,'Automation transcription of the input recording (XML)',
+                extension='.xml', #set an extension or set a filename:
+                removeextensions=['.ctm'],
+                multi=True
+        ),
+        OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.schrijf.txt', #set an extension or set a filename:
+                removeextensions=['.ctm'],
                 multi=True
         )
     )
