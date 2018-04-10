@@ -18,7 +18,7 @@ setup(
     license = "GPL",
     keywords = "nlp computational_linguistics",
     url = "https://github.com/proycon/spreek2schrijf",
-    packages=['spreek2schrijf'],
+    packages=['spreek2schrijf', 'spreek2schrijf.webservice'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -36,5 +36,5 @@ setup(
         's2s-aligner = spreek2schrijf.aligner:main',
         's2s-buildparcorpus = spreek2schrijf.buildparcorpus:main',
         's2s-extracttext = spreek2schrijf.extracttext:main'
-       ] }
+    ] }
 )
