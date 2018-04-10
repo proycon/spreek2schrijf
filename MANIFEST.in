@@ -1,0 +1,8 @@
+include README.rst
+include LICENSE
+include spreek2schrijf/*.py
+include spreek2schrijf/webservice/*.py
+include spreek2schrijf/webservice/*.txt
+include spreek2schrijf/webservice/*.sh
+include spreek2schrijf/webservice/*.wsgi
+include spreek2schrijf/webservice/*.perl
