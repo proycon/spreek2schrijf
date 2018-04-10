@@ -86,7 +86,7 @@ for inputfile in $INPUTDIRECTORY/*; do
       cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
   fi
   cat $OUTPUTDIRECTORY/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $OUTPUTDIRECTORY/${file_id}.sent #currently computed but ignored!!!
-  $S2SDIR/spreek2schrijf/webservice/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
+  python3 $S2SDIR/spreek2schrijf/webservice/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
   sed -e "s|path=|path=$S2SDIR/model/|g" $S2SDIR/model/moses.ini > $SCRATCHDIRECTORY/moses.ini
   cat $SCRATCHDIRECTORY/moses.ini >&2
   echo "MT Decoding $filename..." >&2
