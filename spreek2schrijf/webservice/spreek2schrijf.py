@@ -142,7 +142,7 @@ class CTMFormat(CLAMMetaData):
     name = "Conversation Time Marked File"
     mimetype = 'text/xml'
 
- CUSTOM_FORMATS = [ CTMFormat ]
+CUSTOM_FORMATS = [ CTMFormat ]
 
 # ======= INTERFACE OPTIONS ===========
 
