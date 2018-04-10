@@ -84,7 +84,7 @@ if 'VIRTUAL_ENV' in os.environ:
         DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
         SECRET_KEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
         ADMINS = ['proycon','antalb','wstoop']
-        MAXLOADAVG = 16.0
+        MAXLOADAVG = 45.0
         INTERFACEOPTIONS = "disableliveinput"
     elif host == "twist":
         DEBUG = True
