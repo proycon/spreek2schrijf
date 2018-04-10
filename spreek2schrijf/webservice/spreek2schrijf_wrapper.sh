@@ -72,7 +72,10 @@ for inputfile in $INPUTDIRECTORY/*; do
   extension="${filename##*.}"
   file_id=$(basename "$inputfile" .$extension)
   if [ "$extension" = "ctm" ]; then
+      echo "Using CTM file $filename..." >&2
+      echo "Using CTM file $filename..." >> $STATUSFILE
       cp $inputfile $OUTPUTDIRECTORY/${file_id}.ctm
+      python3 $S2SDIR/spreek2schrijf/webservice/ctm2txt.py $OUTPUTDIRECTORY/$file_id > ${file_id}.spraak.txt
   else
       echo "Audio conversion $filename..." >&2
       echo "Audio conversion $filename..." >> $STATUSFILE
@@ -86,14 +89,14 @@ for inputfile in $INPUTDIRECTORY/*; do
       cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
   fi
   cat $OUTPUTDIRECTORY/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $OUTPUTDIRECTORY/${file_id}.sent #currently computed but ignored!!!
-  python3 $S2SDIR/spreek2schrijf/webservice/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
+  #python3 $S2SDIR/spreek2schrijf/webservice/ctm2xml.py $OUTPUTDIRECTORY $file_id $SCRATCHDIRECTORY
   sed -e "s|path=|path=$S2SDIR/model/|g" $S2SDIR/model/moses.ini > $SCRATCHDIRECTORY/moses.ini
   cat $SCRATCHDIRECTORY/moses.ini >&2
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
   $MOSESDIR/moses -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt
-  $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
-  if [ -d $target_dir ]; then
+  python3 $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
+  if [ ! -z "$target_dir" ] && [ -d "$target_dir" ]; then
       rm -Rf $target_dir
   fi
 done
