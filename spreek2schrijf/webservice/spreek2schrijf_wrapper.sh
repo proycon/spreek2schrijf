@@ -75,7 +75,7 @@ for inputfile in $INPUTDIRECTORY/*; do
       echo "Using CTM file $filename..." >&2
       echo "Using CTM file $filename..." >> $STATUSFILE
       cp $inputfile $OUTPUTDIRECTORY/${file_id}.ctm
-      python3 $S2SDIR/spreek2schrijf/webservice/ctm2txt.py $OUTPUTDIRECTORY/$file_id > $OUTPUTDIRECTORY/${file_id}.spraak.txt
+      python3 $S2SDIR/spreek2schrijf/webservice/ctm2txt.py $OUTPUTDIRECTORY/$file_id.ctm > $OUTPUTDIRECTORY/${file_id}.spraak.txt
   else
       echo "Audio conversion $filename..." >&2
       echo "Audio conversion $filename..." >> $STATUSFILE
