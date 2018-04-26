@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "Spreek2Schrijf",
-    version = "0.2.1",
+    version = "0.2.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Scripts"),
@@ -31,7 +31,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     package_data = {'spreek2schrijf':['webservice/*.sh','webservice/*.txt','webservice/*.wsgi','webservice/*.perl'] },
-    install_requires=[  'python-ucto >= 0.2.2','python-Levenshtein','numpy','lxml'],
+    install_requires=[  'python-ucto >= 0.2.2','python-Levenshtein','numpy','lxml', 'beautifulsoup4'],
     entry_points = {    'console_scripts': [
         's2s-aligner = spreek2schrijf.aligner:main',
         's2s-buildparcorpus = spreek2schrijf.buildparcorpus:main',
