@@ -142,7 +142,12 @@ class CTMFormat(CLAMMetaData):
     name = "Conversation Time Marked File"
     mimetype = 'text/xml'
 
-CUSTOM_FORMATS = [ CTMFormat ]
+class FlemishHTMLFormat(CLAMMetaData):
+    attributes = {}
+    name = "Flemish HTML Format"
+    mimetype = 'text/html'
+
+CUSTOM_FORMATS = [ CTMFormat, FlemishHTMLFormat ]
 
 # ======= INTERFACE OPTIONS ===========
 
@@ -285,6 +290,30 @@ PROFILES = [
                 SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
                 extension='.schrijf.txt', #set an extension or set a filename:
                 removeextensions=['.ctm'],
+                multi=True
+        )
+    ),
+    Profile(
+        InputTemplate('InputHTML',FlemishHTMLFormat,"Flemish input HTML (very specific formatting, not just any HTML)",
+            extension='.html',
+            multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
+        ),
+        #------------------------------------------------------------------------------------------------------------------------
+        OutputTemplate('Transcription',PlainTextFormat,'Automatic transcription of the input recording',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.spraak.txt', #set an extension or set a filename:
+                removeextensions=['.html'],
+                multi=True
+        ),
+        OutputTemplate('Translation',PlainTextFormat,'Automatic translation to written language for formal proceedings',
+                SetMetaField('encoding','utf-8'), #note that encoding is required if you work with PlainTextFormat
+                extension='.schrijf.txt', #set an extension or set a filename:
+                removeextensions=['.html'],
+                multi=True
+        ),
+        OutputTemplate('TranslationHTML',FlemishHTMLFormat,'Automatic translation to written language for formal proceedings',
+                extension='.html', #set an extension or set a filename:
+                removeextensions=['.html'],
                 multi=True
         )
     )
