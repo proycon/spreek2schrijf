@@ -68,6 +68,7 @@ KALDI_root=$KALDI_main/egs/Kaldi_NL
 
 cd $KALDI_root
 for inputfile in $INPUTDIRECTORY/*; do
+  inputfile_absolute=$(realpath inputfile)
   filename=$(basename "$inputfile")
   extension="${filename##*.}"
   file_id=$(basename "$inputfile" .$extension)
@@ -77,6 +78,11 @@ for inputfile in $INPUTDIRECTORY/*; do
       cp $inputfile $OUTPUTDIRECTORY/${file_id}.ctm
       python3 $S2SDIR/spreek2schrijf/webservice/ctm2txt.py $OUTPUTDIRECTORY/$file_id.ctm > $OUTPUTDIRECTORY/${file_id}.spraak.txt
   elif [ "$extension" = "html" ]; then
+      cd $OUTPUTDIRECTORY
+      python3 $S2SDIR/spreek2schrijf/webservice/parseflemishhtml.py $inputfile_absolute
+      mv out.txt ${file_id}.spraak.txt
+      mv out.json ${file_id}.spraak.json
+      cd $KALDI_root
   else
       echo "Audio conversion $filename..." >&2
       echo "Audio conversion $filename..." >> $STATUSFILE
@@ -97,6 +103,9 @@ for inputfile in $INPUTDIRECTORY/*; do
   echo "MT Decoding $filename..." >> $STATUSFILE
   $MOSESDIR/moses -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt
   python3 $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
+  if [ "$extension" = "html" ]; then
+     python3 $S2SDIR/spreek2schrijf/webservice/writeflemishhtml.py $OUTPUTDIRECTORY/${file_id}.schrijf.txt $OUTPUTDIRECTORY/${file_id}.spraak.json > $OUTPUTDIRECTORY/${file_id}.html
+  fi
   if [ ! -z "$target_dir" ] && [ -d "$target_dir" ]; then
       rm -Rf $target_dir
   fi
