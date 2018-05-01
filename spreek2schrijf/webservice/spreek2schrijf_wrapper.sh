@@ -78,8 +78,14 @@ for inputfile in $INPUTDIRECTORY/*; do
       cp $inputfile $OUTPUTDIRECTORY/${file_id}.ctm
       python3 $S2SDIR/spreek2schrijf/webservice/ctm2txt.py $OUTPUTDIRECTORY/$file_id.ctm > $OUTPUTDIRECTORY/${file_id}.spraak.txt
   elif [ "$extension" = "html" ]; then
+      echo "Using HTML file $filename..." >&2
+      echo "Using HTML file $filename..." >> $STATUSFILE
       cd $OUTPUTDIRECTORY
       python3 $S2SDIR/spreek2schrijf/webservice/parseflemishhtml.py $inputfile_absolute
+      if [ $? -ne 0 ];
+          echo "Parse flemish HTML failed, input was $inputfile_absolute">&2
+          exit 2
+      fi
       mv out.txt ${file_id}.spraak.txt
       mv out.json ${file_id}.spraak.json
       cd $KALDI_root
