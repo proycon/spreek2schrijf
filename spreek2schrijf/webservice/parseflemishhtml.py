@@ -34,6 +34,7 @@ for p in doc.find_all('p'):
             else:
                 sentence.append(token)
         if sentence: #trailing sentence
+            seqnr += 1
             sentences.append({'seqnr': seqnr, 'tokens': sentence})
             sentence = []
         events.append({'speaker': speaker, 'src': srcfile, 'begintime': begintime, 'endtime': endtime, 'sentences':sentences})
