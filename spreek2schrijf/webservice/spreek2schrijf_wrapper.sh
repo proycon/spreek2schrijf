@@ -68,7 +68,7 @@ KALDI_root=$KALDI_main/egs/Kaldi_NL
 
 cd $KALDI_root
 for inputfile in $INPUTDIRECTORY/*; do
-  inputfile_absolute=$(realpath inputfile)
+  inputfile_absolute=$(realpath "$inputfile")
   filename=$(basename "$inputfile")
   extension="${filename##*.}"
   file_id=$(basename "$inputfile" .$extension)
