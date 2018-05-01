@@ -82,7 +82,7 @@ for inputfile in $INPUTDIRECTORY/*; do
       echo "Using HTML file $filename..." >> $STATUSFILE
       cd $OUTPUTDIRECTORY
       python3 $S2SDIR/spreek2schrijf/webservice/parseflemishhtml.py $inputfile_absolute
-      if [ $? -ne 0 ];
+      if [ $? -ne 0 ]; then
           echo "Parse flemish HTML failed, input was $inputfile_absolute">&2
           exit 2
       fi
