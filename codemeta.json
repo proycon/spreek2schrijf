@@ -61,6 +61,11 @@
 			"@type": "SoftwareApplication",
 			"identifier": "kaldi",
 			"name": "kaldi"
+		},
+        {
+			"@type": "SoftwareApplication",
+			"identifier": "moses",
+			"name": "Moses"
 		}
 	],
     "funder": {
@@ -68,7 +73,7 @@
         "name": "Tweede Kamer der Staten-Generaal",
         "url": "https://www.tweedekamer.nl/"
     },
-	"readme": "https://github.com/proycon/spreek2schrijf/blob/master/README.md",
+	"readme": "https://github.com/proycon/spreek2schrijf/blob/master/README.rst",
 	"issueTracker": "https://github.com/proycon/spreek2schrijf/issues",
 	"developmentStatus": "active",
 	"keywords":  [ "nlp", "speech recognition", "dutch" ],
