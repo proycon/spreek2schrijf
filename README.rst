@@ -1,3 +1,9 @@
+.. image:: http://applejack.science.ru.nl/lamabadge.php/spreek2schrijf
+   :target: http://applejack.science.ru.nl/languagemachines/
+
+.. image:: https://zenodo.org/badge/109272697.svg
+   :target: https://zenodo.org/badge/latestdoi/109272697
+
 Spreek2Schrijf
 ====================
 
