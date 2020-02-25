@@ -55,13 +55,13 @@ echo "Starting..." >> $STATUSFILE
 if [[ $(hostname) == "mlp01" ]]; then
     KALDI_main=/var/www/lamachine2/weblamachine/opt/kaldi
     export S2SDIR=/var/www/webservices-lst/live/repo/spreek2schrijf
-    MOSESDIR=/var/www/lamachine2/weblamachine/bin/moses
+    MOSES=/var/www/lamachine2/weblamachine/bin/moses
     KALDI_NL=/var/www/lamachine2/weblamachine/opt/kaldi_nl
     export SKIP_NVM=1 #tell LaMachine to skip NVM activation, we don't need it
 elif [[ ${hostname:0:3} == "mlp" ]]; then
     KALDI_main=/vol/customopt/lamachine.dev/kaldi
     export S2SDIR=$(realpath ../../)
-    MOSESDIR=/var/www/lamachine2/weblamachine/bin/moses
+    MOSES=/var/www/lamachine2/weblamachine/bin/moses
     KALDI_NL=$KALDI_main/egs/Kaldi_NL
 else
     echo "Specify KALDI_main!" >&2
@@ -109,7 +109,7 @@ for inputfile in $INPUTDIRECTORY/*; do
   cat $SCRATCHDIRECTORY/moses.ini >&2
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
-  $MOSESDIR/moses -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt
+  $MOSES -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt
   python3 $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
   if [ "$extension" = "html" ]; then
      python3 $S2SDIR/spreek2schrijf/webservice/writeflemishhtml.py $OUTPUTDIRECTORY/${file_id}.schrijf.txt $OUTPUTDIRECTORY/${file_id}.spraak.json > $OUTPUTDIRECTORY/${file_id}.html
