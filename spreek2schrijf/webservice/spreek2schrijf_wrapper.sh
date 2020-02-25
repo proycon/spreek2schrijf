@@ -53,20 +53,21 @@ echo "Starting..." >> $STATUSFILE
 #Invoke your actual system, whatever it may be, adapt accordingly
 
 if [[ $(hostname) == "mlp01" ]]; then
-    KALDI_main=/var/www/lamachine/src/kaldi
+    KALDI_main=/var/www/lamachine2/weblamachine/opt/kaldi
     export S2SDIR=/var/www/webservices-lst/live/repo/spreek2schrijf
-    MOSESDIR=/vol/customopt/machine-translation/bin
+    MOSESDIR=/var/www/lamachine2/weblamachine/bin/moses
+    KALDI_NL=/var/www/lamachine2/weblamachine/opt/kaldi_nl
 elif [[ ${hostname:0:3} == "mlp" ]]; then
     KALDI_main=/vol/customopt/lamachine.dev/kaldi
     export S2SDIR=$(realpath ../../)
-    MOSESDIR=/vol/customopt/machine-translation/bin
+    MOSESDIR=/var/www/lamachine2/weblamachine/bin/moses
+    KALDI_NL=$KALDI_main/egs/Kaldi_NL
 else
     echo "Specify KALDI_main!" >&2
     exit 2
 fi
-KALDI_root=$KALDI_main/egs/Kaldi_NL
 
-cd $KALDI_root
+cd $KALDI_NL
 for inputfile in $INPUTDIRECTORY/*; do
   inputfile_absolute=$(realpath "$inputfile")
   filename=$(basename "$inputfile")
@@ -88,7 +89,7 @@ for inputfile in $INPUTDIRECTORY/*; do
       fi
       mv out.txt ${file_id}.spraak.txt
       mv out.json ${file_id}.spraak.json
-      cd $KALDI_root
+      cd $KALDI_NL
   else
       echo "Audio conversion $filename..." >&2
       echo "Audio conversion $filename..." >> $STATUSFILE
