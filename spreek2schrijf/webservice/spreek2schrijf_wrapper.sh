@@ -37,6 +37,28 @@ mkdir -p $SCRATCHDIRECTORY
 #Output a status message to the status file that users will see in the interface
 echo "Starting..." >> $STATUSFILE
 
+fatalerror() {
+    echo "-----------------------------------------------------------------------" >&2
+    echo "FATAL ERROR: $*" >&2
+    echo "-----------------------------------------------------------------------" >&2
+    echo "$*" >> $STATUSFILE
+    if [ ! -z "$target_dir" ]; then
+        echo "[Index of $target_dir]" >&2
+        du -ah $target_dir >&2
+        echo "[End of index]">&2
+        echo "[Output of intermediate log]" >&2
+        cat $target_dir/intermediate/log >&2
+        echo "[End output of intermediate log]">&2
+        echo "[Output of kaldi decode logs]" >&2
+        cat $target_dir/intermediate/decode/decode*log >&2
+        echo "[End of kaldi decode logs]" >&2
+        if [ ! -z "$debug" ]; then
+            echo "(cleaning intermediate files after error)">&2
+            rm -Rf $target_dir
+        fi
+    fi
+    exit 2
+}
 #Example parameter parsing using getopt:
 #while getopts ":h" opt "$PARAMETERS"; do
 #  case $opt in
@@ -85,7 +107,7 @@ for inputfile in $INPUTDIRECTORY/*; do
       cd $OUTPUTDIRECTORY
       python3 $S2SDIR/spreek2schrijf/webservice/parseflemishhtml.py $inputfile_absolute
       if [ $? -ne 0 ]; then
-          echo "Parse flemish HTML failed, input was $inputfile_absolute">&2
+          echo "ERROR: Parse flemish HTML failed, input was $inputfile_absolute">&2
           exit 2
       fi
       mv out.txt ${file_id}.spraak.txt
@@ -94,12 +116,13 @@ for inputfile in $INPUTDIRECTORY/*; do
   else
       echo "Audio conversion $filename..." >&2
       echo "Audio conversion $filename..." >> $STATUSFILE
-      sox $inputfile -e signed-integer -c 1 -r 16000 -b 16 $SCRATCHDIRECTORY/${file_id}.wav
+      sox $inputfile -e signed-integer -c 1 -r 16000 -b 16 $SCRATCHDIRECTORY/${file_id}.wav || fatalerror "Audio conversion failed"
       target_dir=$SCRATCHDIRECTORY/${file_id}_$(date +"%y_%m_%d_%H_%m_%S")
       mkdir -p $target_dir
       echo "ASR Decoding $filename..." >&2
       echo "ASR Decoding $filename..." >> $STATUSFILE
-      ./decode_PR.sh $SCRATCHDIRECTORY/${file_id}.wav $target_dir
+      ./decode_PR.sh $SCRATCHDIRECTORY/${file_id}.wav $target_dir || fatalerror "ASR decoding failed"
+
       cat $target_dir/${file_id}.txt | cut -d'(' -f 1 > $OUTPUTDIRECTORY/${file_id}.spraak.txt
       cp $target_dir/1Best.ctm $OUTPUTDIRECTORY/${file_id}.ctm
       cat $OUTPUTDIRECTORY/${file_id}.ctm | perl $S2SDIR/spreek2schrijf/webservice/wordpausestatistic.perl 1.0 $OUTPUTDIRECTORY/${file_id}.sent #currently computed but ignored!!!
@@ -109,8 +132,8 @@ for inputfile in $INPUTDIRECTORY/*; do
   cat $SCRATCHDIRECTORY/moses.ini >&2
   echo "MT Decoding $filename..." >&2
   echo "MT Decoding $filename..." >> $STATUSFILE
-  $MOSES -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt
-  python3 $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt
+  $MOSES -f $SCRATCHDIRECTORY/moses.ini  < $OUTPUTDIRECTORY/${file_id}.spraak.txt > $OUTPUTDIRECTORY/${file_id}.mt-out.txt || fatalerror "MT Decoding failed"
+  python3 $S2SDIR/spreek2schrijf/webservice/postcorrect.py $OUTPUTDIRECTORY/${file_id}.mt-out.txt $S2SDIR/spreek2schrijf/webservice/namen.txt > $OUTPUTDIRECTORY/${file_id}.schrijf.txt || fatalerror "MT Postprocessing failed"
   if [ "$extension" = "html" ]; then
      python3 $S2SDIR/spreek2schrijf/webservice/writeflemishhtml.py $OUTPUTDIRECTORY/${file_id}.schrijf.txt $OUTPUTDIRECTORY/${file_id}.spraak.json > $OUTPUTDIRECTORY/${file_id}.html
   fi
