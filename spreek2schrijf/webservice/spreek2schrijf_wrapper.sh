@@ -57,6 +57,7 @@ if [[ $(hostname) == "mlp01" ]]; then
     export S2SDIR=/var/www/webservices-lst/live/repo/spreek2schrijf
     MOSESDIR=/var/www/lamachine2/weblamachine/bin/moses
     KALDI_NL=/var/www/lamachine2/weblamachine/opt/kaldi_nl
+    export SKIP_NVM=1 #tell LaMachine to skip NVM activation, we don't need it
 elif [[ ${hostname:0:3} == "mlp" ]]; then
     KALDI_main=/vol/customopt/lamachine.dev/kaldi
     export S2SDIR=$(realpath ../../)
