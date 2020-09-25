@@ -31,7 +31,7 @@ import sys
 import os
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.99
+REQUIRE_VERSION = 3.0
 
 CLAMDIR = clam.__path__[0] #directory where CLAM is installed, detected automatically
 WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this webservice is installed, detected automatically
@@ -51,58 +51,7 @@ SYSTEM_DESCRIPTION = "Deze webservice gebruikt spraakherkenning om opnamen in de
 
 CUSTOMHTML_PROJECTSTART = "Let op: De geüploade audio bestanden mogen <strong>geen</strong> spaties bevatten!"
 
-# ================ Server specific configuration for CLAM ===============
-host = os.uname()[1]
-if 'VIRTUAL_ENV' in os.environ:
-    # Virtual Environment (LaMachine)
-    ROOT = os.environ['VIRTUAL_ENV'] + "/spreek2schrijf.clam/"
-    PORT = 8802
-
-    if host == 'mlp01': #configuration for server in Nijmegen
-        HOST = "webservices-lst.science.ru.nl"
-        URLPREFIX = 'spreek2schrijf'
-
-        if not 'CLAMTEST' in os.environ:
-            ROOT = "/var/www/webservices-lst/live/writable/spreek2schrijf/"
-            if 'CLAMSSL' in os.environ:
-                PORT = 443
-            else:
-                PORT = 80
-        else:
-            ROOT = "/var/www/webservices-lst/test/writable/spreek2schrijf/"
-            PORT = 81
-
-        USERS_MYSQL = {
-            'host': 'mysql-clamopener.science.ru.nl',
-            'user': 'clamopener',
-            'password': D(open(os.environ['CLAMOPENER_KEYFILE']).read().strip()),
-            'database': 'clamopener',
-            'table': 'clamusers_clamusers'
-        }
-        DEBUG = False
-        REALM = "WEBSERVICES-LST"
-        DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
-        SECRET_KEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
-        ADMINS = ['proycon','antalb','wstoop']
-        MAXLOADAVG = 45.0
-        INTERFACEOPTIONS = "disableliveinput"
-    elif host == "twist":
-        DEBUG = True
-        ROOT = "/vol/tensusers/eyilmaz/Spreek2Schrijf/webservice/writable/"
-        INTERFACEOPTIONS = "disableliveinput"
-else:
-    raise Exception("I don't know where I'm running from! Got " + host)
-
-# ======== AUTHENTICATION & SECURITY ===========
-
-#Users and passwords
-
-#set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
-#REALM = SYSTEM_ID
-
-USERS = None #no user authentication/security (this is not recommended for production environments!)
-
-ADMINS = None #List of usernames that are administrator and can access the administrative web-interface (on URL /admin/)
+loadconfig(__name__)
 
 #If you want to enable user-based security, you can define a dictionary
 #of users and (hashed) passwords here. The actual authentication will proceed
