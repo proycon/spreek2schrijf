@@ -31,7 +31,7 @@ import sys
 import os
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.99
+REQUIRE_VERSION = 3.0
 
 CLAMDIR = clam.__path__[0] #directory where CLAM is installed, detected automatically
 WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this webservice is installed, detected automatically
@@ -48,6 +48,23 @@ SYSTEM_NAME = "Spreek2Schrijf"
 
 #An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML)
 SYSTEM_DESCRIPTION = "Deze webservice gebruikt spraakherkenning om opnamen in de Tweede Kamer om te zetten in een spraaktranscriptie, en een vertaalengine om deze vervolgens naar schrijftaal om te zetten."
+
+#A version label of the underlying tool and/or this CLAM wrapper
+#(If you can derive this dynamically then that is strongly recommended!)
+SYSTEM_VERSION = "0.2.3"
+
+#The author(s) of the underlying tool and/or this CLAM wrapper
+#(If you can derive this dynamically then that is strongly recommended!)
+SYSTEM_AUTHOR = "Maarten van Gompel, Louis ten Bosch"
+
+SYSTEM_AFFILIATION = "Centre for Language and Speech Technology, Radboud University"
+
+#How to reach the authors?
+SYSTEM_EMAIL = "h.vandenheuvel@let.ru.nl"
+
+SYSTEM_LICENSE = "GNU Public License v3"
+
+SYSTEM_URL = "https://github.com/proycon/spreek2schrijf"
 
 CUSTOMHTML_PROJECTSTART = "Let op: De geüploade audio bestanden mogen <strong>geen</strong> spaties bevatten!"
 
@@ -358,7 +375,7 @@ COMMAND = WEBSERVICEDIR + "/spreek2schrijf_wrapper.sh $STATUSFILE $INPUTDIRECTOR
 #are a list of instances from common/parameters.py
 
 PARAMETERS =  [
-    ('Group title', [
+    ('', [
         #BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
         #ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
         #StringParameter(id='author',name='Author',description='Sign output metadata with the specified author name',maxlength=255),
