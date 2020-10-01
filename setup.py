@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "Spreek2Schrijf",
-    version = "0.2.3",
+    version = "0.2.4", #also update in spreek2schrijf.py
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Scripts"),

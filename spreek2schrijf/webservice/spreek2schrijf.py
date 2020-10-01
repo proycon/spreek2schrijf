@@ -51,7 +51,7 @@ SYSTEM_DESCRIPTION = "Deze webservice gebruikt spraakherkenning om opnamen in de
 
 #A version label of the underlying tool and/or this CLAM wrapper
 #(If you can derive this dynamically then that is strongly recommended!)
-SYSTEM_VERSION = "0.2.3"
+SYSTEM_VERSION = "0.2.4"
 
 #The author(s) of the underlying tool and/or this CLAM wrapper
 #(If you can derive this dynamically then that is strongly recommended!)
