@@ -85,8 +85,26 @@ elif [[ ${hostname:0:3} == "mlp" ]]; then
     export S2SDIR=$(realpath ../../)
     MOSES=/var/www/lamachine2/weblamachine/bin/moses
     KALDI_NL=$KALDI_main/egs/Kaldi_NL
+elif [ ! -z "$LM_PREFIX" ]; then
+    KALDI_main=$LM_PREFIX/opt/kaldi
+    export S2SDIR=$(realpath ../../)
+    MOSES=$LM_PREFIX/bin/moses
+    KALDI_NL=$KALDI_main/opt/kaldi_nl
 else
     echo "Specify KALDI_main!" >&2
+    exit 2
+fi
+
+if [ ! -e "$KALDI_main" ]; then
+    echo "KALDI_main not found: $KALDI_main" >&2
+    exit 2
+fi
+if [ ! -e "$KALDI_NL" ]; then
+    echo "KALDI_NL not found: $KALDI_NL" >&2
+    exit 2
+fi
+if [ ! -e "$MOSES" ]; then
+    echo "Moses not found: $MOSES" >&2
     exit 2
 fi
 
