@@ -89,7 +89,7 @@ elif [ ! -z "$LM_PREFIX" ]; then
     KALDI_main=$LM_PREFIX/opt/kaldi
     export S2SDIR=$(realpath ../../)
     MOSES=$LM_PREFIX/bin/moses
-    KALDI_NL=$KALDI_main/opt/kaldi_nl
+    KALDI_NL=$LM_PREFIX/opt/kaldi_nl
 else
     echo "Specify KALDI_main!" >&2
     exit 2
