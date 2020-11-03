@@ -87,7 +87,7 @@ elif [[ ${hostname:0:3} == "mlp" ]]; then
     KALDI_NL=$KALDI_main/egs/Kaldi_NL
 elif [ ! -z "$LM_PREFIX" ]; then
     KALDI_main=$LM_PREFIX/opt/kaldi
-    export S2SDIR=$(realpath ../../)
+    export S2SDIR=$LM_PREFIX/opt/spreek2schrijf
     MOSES=$LM_PREFIX/bin/moses
     KALDI_NL=$LM_PREFIX/opt/kaldi_nl
 else
